@@ -1,0 +1,410 @@
+---
+title: "How to Wrangle COVID-19 (Data)"
+author: "Emily Buttafuoco + Julie Locantore"
+output: 
+    learnr::tutorial:
+        progressive: true
+        allow_skip: true
+        theme: yeti
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+
+library(learnr)
+library(tidyverse)
+library(ggthemes)
+library(dplyr)
+library(readr)
+library(leaflet)
+
+urlfile11="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/04-01-2020.csv"
+day11<-read_csv(url(urlfile11))
+day11 = day11 %>% 
+  select(Province_State, Country_Region, Confirmed, Deaths, Recovered, Active, Combined_Key, Lat, Long_) %>% 
+  mutate(Date = "04012020")
+
+urlfile10="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-31-2020.csv"
+day10<-read_csv(url(urlfile10))
+day10 = day10 %>% 
+  select(Province_State, Country_Region, Confirmed, Deaths, Recovered, Active, Combined_Key, Lat, Long_) %>% 
+  mutate(Date = "03312020")
+
+urlfile9="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-30-2020.csv"
+day9<-read_csv(url(urlfile9))
+day9 = day9 %>% 
+  select(Province_State, Country_Region, Confirmed, Deaths, Recovered, Active, Combined_Key, Lat, Long_) %>% 
+  mutate(Date = "03302020")
+
+urlfile8="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-29-2020.csv"
+day8<-read_csv(url(urlfile8))
+day8 = day8 %>% 
+  select(Province_State, Country_Region, Confirmed, Deaths, Recovered, Active, Combined_Key, Lat, Long_) %>% 
+  mutate(Date = "03292020")
+
+urlfile7="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-28-2020.csv"
+day7<-read_csv(url(urlfile7))
+day7 = day7 %>% 
+  select(Province_State, Country_Region, Confirmed, Deaths, Recovered, Active, Combined_Key, Lat, Long_) %>% 
+  mutate(Date = "03282020")
+
+
+urlfile6="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-27-2020.csv"
+day6<-read_csv(url(urlfile6))
+day6 = day6 %>% 
+  select(Province_State, Country_Region, Confirmed, Deaths, Recovered, Active, Combined_Key, Lat, Long_) %>% 
+  mutate(Date = "03272020")
+
+
+urlfile5="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-26-2020.csv"
+day5<-read_csv(url(urlfile5))
+day5 = day5 %>% 
+  select(Province_State, Country_Region, Confirmed, Deaths, Recovered, Active, Combined_Key, Lat, Long_) %>% 
+  mutate(Date = "03262020")
+
+
+urlfile4="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-25-2020.csv"
+day4<-read_csv(url(urlfile4))
+day4 = day4 %>% 
+  select(Province_State, Country_Region, Confirmed, Deaths, Recovered, Active, Combined_Key, Lat, Long_) %>% 
+  mutate(Date = "03252020")
+
+
+urlfile3="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-24-2020.csv"
+day3<-read_csv(url(urlfile3))
+day3 = day3 %>% 
+  select(Province_State, Country_Region, Confirmed, Deaths, Recovered, Active, Combined_Key, Lat, Long_) %>% 
+  mutate(Date = "03242020")
+
+
+urlfile2="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-23-2020.csv"
+day2<-read_csv(url(urlfile2))
+day2 = day2 %>% 
+  select(Province_State, Country_Region, Confirmed, Deaths, Recovered, Active, Combined_Key, Lat, Long_) %>% 
+  mutate(Date = "03232020")
+
+urlfile1="https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-22-2020.csv"
+day1<-read_csv(url(urlfile1))
+day1 = day1 %>% 
+  select(Province_State, Country_Region, Confirmed, Deaths, Recovered, Active, Combined_Key, Lat, Long_) %>% 
+  mutate(Date = "03222020")
+
+covid19 <- bind_rows(day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11)
+
+covid19_MA = covid19 %>%
+  filter(Province_State == "Massachusetts")
+covid19_MA
+```
+
+
+## **Introduction**
+
+### What is Data Wrangling?
+Data Wrangling is the process of manipulating and/or transforming data. Here, we will use the *dplyr* grammar from R's "Tidyverse" package collection. For this data wrangling tutorial, we are going to use a dataset with information on the coronavirus disease 2019 (COVID-19) pandemic. These data are sourced from [The Center for Systems Science and Engineering (CSSE) at John Hopkins University](https://github.com/CSSEGISandData/COVID-19).
+
+### What is COVID-19?
+COVID-19, caused by the novel SARS-CoV-2 virus, can result in severe acute respiratory syndrome. The ongoing pandemic has resulted in drastic economic and social consequences wordwide. Additionally, the virus is highly contagious and disease severity varies widely. The first documented case was reported in December 2019 in Wuhan, China. However, the number of COVID-19 cases are surging more and more every day. Here, we are focusing on the COVID-19 cases from March 22nd to April 1st (2020) in Massachusetts and different regions of the United States.
+![](https://www.youtube.com/watch?v=JKpVMivbTfg)
+
+## **Working with *dplyr* **
+
+### *dplyr* is a package in R's Tidyverse collection that is used for data manipulation, and provides a set of verbs that help solve the most common data manipulation challenges.
+
+###  Five common verbs for working with data in *dplyr*:
+- select(): take a subset of columns from a dataset
+- filter(): take a subset of rows from a dataset
+- mutate(): add or modify exsisting columns
+- arrange(): sort rows 
+- summarize(): aggregate data across rows
+
+### The pipeline operator: `%>%`
+- The pipeline operator (`%>%`) allows an intermediate result to be passed onto the next function. Therefore, `%>%`  allows multiple functions to be chained together, without needing variables to store the intermediate results. 
+
+- The keyboard shortcut for `%>%` is [Ctrl]+[Shift]+[M].
+
+- Note: The order in which you pipe functions together matters depending on what you want to do!
+
+## **Exercise 1** 
+### *Determining the daily COVID-19 Death Rate in Massachusetts between March 22nd and April 1st.*
+
+- If you plan to try executing some of these exercises in RStudio, make sure you load the packages needed for this tutorial before starting. If you do not have these packages installed already, use "install.packages("package-name")" to install. 
+- First, we are going to break down using some of the common verbs used in dplyr step-by-step in an interactive tutorial.
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library(learnr)
+library(tidyverse)
+library(ggthemes)
+library(dplyr)
+library(readr)
+library(leaflet)
+```
+
+### **a)** Using `filter()` in a pipeline to retrieve data from Massachusetts only.
+
+```{r prepare-covid , include=FALSE}
+covid19_MA = covid19 %>%
+  filter(Province_State == "Massachusetts")
+covid19_MA
+```
+
+```{r filter, exercise=TRUE, exercise.eval=FALSE, exercise.setup = "prepare-covid", warning=FALSE, message=FALSE}
+covid19_MA = covid19 %>%
+  filter(Province_State == "Massachusetts")
+covid19_MA
+```
+
+
+### **b)** Using `select()` to remove extraneous columns from the dataset.
+We can use the `select()` function to remove columns we aren't interested in. In this example, we only care about the Date, Province_State, Confirmed, and Deaths columns.
+```{r select, exercise = TRUE, exercise.eval=FALSE, exercise.setup = "prepare-covid", warning=FALSE, message=FALSE}
+covid19_MA_select = covid19_MA %>%
+  select(Date, Province_State, Confirmed, Deaths)
+covid19_MA_select
+```
+
+### **c)** Using `group_by()` along with `summarize()` to find the total number of confirmed cases and total number of deaths for each day. 
+*Group_by()* allows us to group variables together, whereas *summarize()* collapses the data into rows based on summary statistics. Accordingly, using them together allows us to generate aggregate summary statistics! 
+
+```{r summarize, exercise = TRUE, exercise.eval=FALSE, exercise.setup = "prepare-covid", warning=FALSE, message=FALSE}
+covid19_MA_GBS = covid19_MA %>%
+  group_by(Date) %>% #grouping by Date
+  summarize(total_confirmed = sum(Confirmed), total_deaths = sum(Deaths)) #sum() function sums together values in a vector 
+covid19_MA_GBS
+```
+
+### **d)** Using `mutate()` to create a new variable for death rate for each day. 
+Using the *mutate()* function, we can define and add new variables to the dataframe. Here, we are adding a *death_rate* column.
+```{r mutate, exercise = TRUE, exercise.eval=FALSE, exercise.setup = "prepare-covid", warning=FALSE, message=FALSE}
+covid19_MA_mutate = covid19_MA %>%
+  group_by(Confirmed,Date) %>% 
+  summarize(total_confirmed = sum(Confirmed), total_deaths = sum(Deaths)) %>% 
+  mutate(death_rate = (total_deaths/total_confirmed)*100)
+covid19_MA_mutate
+```
+
+
+### Putting it all together into one cohesive pipeline:
+
+```{r, warning=FALSE, message=FALSE}
+covid19_MA = covid19 %>%
+  filter(Province_State == "Massachusetts") %>% 
+  select(Province_State, Confirmed, Deaths, Date, Combined_Key, Lat, Long_) %>% 
+  group_by(Date) %>% 
+  summarize(total_confirmed = sum(Confirmed), total_deaths = sum(Deaths)) %>% 
+  mutate(death_rate = (total_deaths/total_confirmed)*100)
+covid19_MA
+```
+
+### **e)** Visualizing the new dataset using `ggplot()`:
+
+Using the table produced above along with ggplot, we can plot a graph of the Date versus death rate.  
+```{r plot, exercise = TRUE, exercise.eval=FALSE, exercise.setup = "prepare-covid", warning=FALSE, message=FALSE}
+covid19_MA = covid19 %>%
+  filter(Province_State == "Massachusetts") %>% 
+  select(Province_State, Confirmed, Deaths, Date, Combined_Key, Lat, Long_) %>% 
+  group_by(Date) %>% 
+  summarize(total_confirmed = sum(Confirmed), total_deaths = sum(Deaths)) %>% 
+  mutate(death_rate = (total_deaths/total_confirmed)*100)
+
+
+ggplot(data = covid19_MA, aes(x = Date, y = death_rate)) + #mapping variables (date and death_rate) to x and y coordinates
+  geom_point(color = "red") + #plot points
+  geom_line(aes(group = 1), color = "red")+ #plot line
+  labs( x = "Date of Day", y = "Death Rate", title = "Death Rate in Massachussets", subtitle = "From March 22, 2020 to April 1, 2020", caption = "Source: John Hopkins University CSSE") + # adding labels
+theme_classic() + theme(axis.text.x=element_blank())#changing theme and removing overlapping x-axis labels 
+```
+
+Here we can see that the daily death rate in Massachusetts has fluctuated over time (between March 22, 2020 and April 1, 2020), with the last 2 observed days having a strong increasing trend. 
+
+## **Exercise 2** 
+### *Identifying the top 10 most infected counties within each region of the United States.*
+
+### **a)** Using `separate()` to separate one column with multiple variables into new columns:
+Here, we are demonstrating how to use the `separate()` function on the `Combined_Key` Column, which contains information about county, state, and country. `separate()` creates distinct columns from one column (here, Combined_Key) that the user names in a vector (`into = c("")`) by using a user-defined separator character (`sep = ""`). 
+
+```{r separate, exercise = TRUE, exercise.eval=FALSE, warning=FALSE, message=FALSE}
+covid19_USA = covid19 %>%
+  filter(Country_Region == "US") %>% 
+  separate(Combined_Key, 
+           into = c("County", "State", "Country"), 
+           sep = ",")
+covid19_USA
+```
+
+```{r, warning=FALSE, message=FALSE, include=FALSE}
+covid19_USA = covid19 %>%
+  filter(Country_Region == "US") %>% 
+  separate(Combined_Key, 
+           into = c("County", "State", "Country"), 
+           sep = ",")
+covid19_USA
+```
+
+### **b)** Creating new dataframes for each region within the US using `filter()` and `mutate()`:
+
+#### For this exercise, we must first filter on multiple criteria to create datasets containing only states with regions of the USA.
+
+
+**Northeast:**
+```{r, warning=FALSE, message=FALSE}
+covid19_northeast = covid19_USA %>%
+  filter(Province_State %in% c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont", "New Jersey", "New York", "Pennsylvania")) %>% 
+  mutate(Region = "Northeast")
+```
+
+**Midwest:**
+```{r, warning=FALSE, message=FALSE}
+covid19_midwest = covid19_USA %>%
+  filter(Province_State %in% c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin", "Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota")) %>% 
+  mutate(Region = "Midwest")
+```
+
+**South:**
+```{r, warning=FALSE, message=FALSE}
+covid19_south = covid19_USA %>%
+  filter(Province_State %in% c("Delaware", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "District of Columbia", "West Virginia", "Alabama", "Kentucky", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Oklahoma", "Texas")) %>% 
+  mutate(Region = "South")
+```
+
+**West:**
+```{r, warning=FALSE, message=FALSE}
+covid19_west = covid19_USA %>%
+  filter(Province_State %in% c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming", "Alaska", "California", "Hawaii", "Oregon", "Washington")) %>% 
+  mutate(Region = "West")
+```
+
+### The **function:**
+- We can use `function()` function in order to create a set of statements organized to perform a specific task. Using `function()`, the dplyr functions in the code are nested within and performed by the our function *top10_Counties()* and then results are returned to the user.
+- This `top10_Counties()` function will be used on the dataframes we just created for each US region. This function's purpose is to identify the top ten infected counties and allows us to expedite the data wrangling process since we have 4 different datasets to analyze. 
+- **Writing functions are also helpful because:**
+1. You can give your function an intuitive name that makes your code easy to understand. 
+2. You only need to update code in one place, instead of many when changing your analysis code. 
+2. It eliminates the chance of making incidental mistakes when you copy and paste.
+
+```{r, warning=FALSE, message=FALSE}
+top10_Counties = function(data){ 
+  data %>% 
+    group_by(Date,Region,Province_State, County, Lat, Long_) %>% 
+    summarize(total_confirmed = sum(Confirmed), total_deaths = sum(Deaths)) %>% 
+    mutate(death_rate = (total_deaths/total_confirmed)*100)%>%
+    filter(Date == "04012020") %>% 
+    ungroup()%>% #ungrouping variables
+    top_n(10, wt = total_confirmed)%>% #top_n returns a specific number (n) of rows based on values of a defined variable (wt)
+    arrange(desc(total_confirmed)) #arranging from greatest to least values using arrange(desc())
+}
+```
+
+### **c)** Passing data through the function and combining multiple datasets using `bind_rows()`:
+By passing all of the US region datasets through our `top10_counties()` function, we get dataframes with a uniform number of rows and columns. 
+
+```{r function, exercise = TRUE, exercise.eval=FALSE}
+#passing each of the US region datasets through the top10_Counties() function
+top10_NE = top10_Counties(covid19_northeast)
+top10_W = top10_Counties(covid19_west)
+top10_MW = top10_Counties(covid19_midwest)
+top10_S = top10_Counties(covid19_south)
+top10_NE
+top10_W
+top10_MW
+top10_S
+```
+
+We can then use the `bind_rows()` function to combine these datasets together to achieve a unified dataframe containing the top 10 infected counties in each region within the United States.
+```{r bindrows, exercise = TRUE, exercise.eval=FALSE}
+top10_USA = bind_rows(top10_NE,top10_W,top10_MW,top10_S) #using bind_rows() to combine all of the frames into one (by row)
+
+top10_USA
+```
+
+
+```{r, include=FALSE}
+top10_NE = top10_Counties(covid19_northeast)
+top10_W = top10_Counties(covid19_west)
+top10_MW = top10_Counties(covid19_midwest)
+top10_S = top10_Counties(covid19_south)
+
+top10_USA = bind_rows(top10_NE,top10_W,top10_MW,top10_S)
+
+top10_USA
+```
+
+### **d)** Plotting summary data using `geom_col()` with `ggplot()`: 
+
+```{r geomcol, exercise = TRUE, exercise.eval=FALSE}
+barPlot = ggplot(top10_USA, aes(x = Region, y = total_confirmed, fill = Region)) + 
+  geom_col() + scale_fill_brewer(palette = "PiYG") + #using geom_col for bar chart and customizing the bar colors using scale_fill_brewer()
+  labs(x = "Region of US", y = "Total Confirmed Cases", title = "Total Confirmed COVID-Cases in the US as of April 1, 2020", caption = "Source: John Hopkins University CSSE") + theme_few() + theme(legend.position = "none") 
+#added labels using labs
+#changed plot theme using theme_few()
+#removed redundant legend using theme(legend.position = "none")
+barPlot
+```
+
+Here, we can see that the Northeast region of the United States has *significantly* more cases than any other region of the US.
+
+### **d)** Creating a geographical map plot using `leaflet()`:
+- Because our *top10_USA* dataframe contains geographical information (latitude and longitude coordinates), we can also visualize the data on a map of the United States!
+- We will be using the `leaflet` package, which contains open-source JavaScript libraries for interactive maps. 
+```{r, warning=FALSE, message=FALSE}
+factpal <- colorFactor(rainbow(4), top10_USA$Region) #colorFactor() function maps categorical input data to a fixed number of output colors
+
+covid19_US_map = top10_USA %>% 
+  leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>% #changing map type
+  addCircleMarkers(lng = ~Long_, lat = ~Lat, stroke = FALSE, radius = top10_USA$total_confirmed/500, color = ~factpal(Region))
+#adding circular "points" to the plot using their latitude and longitude for position 
+#setting their radius to be proportional to the number of total confirmed cases
+#mapping their color to the different Regions of the USA
+covid19_US_map
+```
+
+
+From this plot, we can see that the county of New York (in New York State) is the epicenter (most confirmed cases) of the COVID-19 epidemic in not just the Northeast region, but in the entire United States between March 22, 2020 and April 1, 2020. Additionally, we can see that in the Midwest region, Cook county has the most cases, in the West region, Los Angeles has the most cases, and in the South, Orleans county has the most cases.
+
+## Summary
+
+  After completing these two exercises, you should have more of an understanding on how to use the *dpylr* package (along with some basic knowledge about using *ggplot()* and *leaflet()*) in order to wrangle data and visualize the results. Maniupulating the data and getting it into a format that allows for easy analysis can be very time consuming. However, *dplyr* can ameliorate the data wrangling process, as each of the five verbs can be used in a combination along with other functions, like `group_by()` and `separate()`, to produce new transformed, tidy tables from existing data.
+
+  In this tutorial, we analyzed COVID-19 cases specifically in the United States. In Exercise 1, we manipulated the dataset in order to examine data for Massachusetts only. We also produced a new variable, death_rate, that further analyzed the given data. `ggplot()` was used in order to plot the death rates per day, showing the fluctuation throughout the given time period. In Exercise 2, we used *dplyr* to manipulate the data and also wrote a custom function in order to create dataframes containing the top 10 most infected counties in each region of the United States. We then combined these dataframes using `bind_rows()` and visualized the results with a bar plot using `ggplot()`, as well as an interactive map plot using the `leaflet()` function.
+  
+## Data Wrangling Quiz
+
+```{r q1, echo=FALSE}
+question("Why is data wrangling important?",
+  answer("It allows one to visualize data."),
+  answer("Because it's cool."),
+  answer("It's sole purpose is to allow one to create statistical data models."),
+  answer("It allows one to manipulate and/or transform data.", correct = TRUE)
+)
+```
+
+```{r q2, echo=FALSE}
+question("What function exclusively allows you to add a new variable to an exisiting dataframe?",
+  answer("summarize()"),
+  answer("filter()"),
+  answer("mutate()", correct = TRUE),
+  answer("separate()")
+)
+```
+
+```{r q3, echo=FALSE}
+question("What function/package allows you to create geographical data visualizations using open-source JavaScript libraries?",
+  answer("ggplot()"),
+  answer("mappy()"),
+  answer("leaflet()", correct = TRUE),
+  answer("plotly()")
+)
+```
+
+```{r q4, echo=FALSE}
+question("Why is it often helpful to write a custom function when wrangling data?",
+  answer("It eliminates the chance of making incidental mistakes when you copy and paste."),
+  answer("You only need to update code in one place, instead of many when changing your analysis code."),
+  answer("You can give your function an intuitive name that makes your code easy to understand."),
+  answer("All of the above.", correct = TRUE)
+)
+```
+
+## References 
+- [The Center for Systems Science and Engineering (CSSE) at John Hopkins University](https://github.com/CSSEGISandData/COVID-19).
+- [ScotinaStats MATH228 Lessons (Data Wrangling and Tidy Data)](https://scotinastats.github.io/MATH228/)
+- [CDC COVID-19 Situation Summary](https://www.cdc.gov/coronavirus/2019-ncov/cases-updates/summary.html)
